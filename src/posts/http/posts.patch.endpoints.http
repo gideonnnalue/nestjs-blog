@@ -1,0 +1,15 @@
+PATCH http://localhost:4000/posts
+Content-Type: application/json
+
+{
+  "id": 9,
+  "postType": "post",
+  "status": "draft",
+  "content": "test-content",
+  "metaOptions": {
+    "metaValue": "{\"sidebarEnabled\": false, \"footerActive\":true}"
+  },
+  "tags": [
+    1, 3, 4
+  ]
+}

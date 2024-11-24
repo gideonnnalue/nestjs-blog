@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { User } from '../user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from '../dtos/create-user.dto';
+import { ConfigService, ConfigType } from '@nestjs/config';
+import profileConfig from '../config/profile.config';
 
 /**
  * Class to connect to Users table and perform business operations
@@ -17,6 +19,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @Inject(profileConfig.KEY)
+    private readonly profileConfiguration: ConfigType<typeof profileConfig>,
   ) {}
 
   public async createUser(createUserDto: CreateUserDto) {
@@ -45,6 +49,8 @@ export class UsersService {
     limit: number,
     page: number,
   ) {
+    // test the new config
+    console.log(this.profileConfiguration);
     return [
       { firstName: 'John', email: 'john@gmail.com' },
       { firstName: 'Alice', email: 'alice@gmail.com' },
@@ -53,10 +59,10 @@ export class UsersService {
 
   /**
    * Find a user by identifier
-   * @param {string} id
+   * @param {number} id
    * @returns {User} user
    */
-  public findOneById(id: string) {
-    return { firstName: 'John', email: 'john@gmail.com' };
+  public async findOneById(id: number) {
+    return await this.usersRepository.findOneBy({ id });
   }
 }

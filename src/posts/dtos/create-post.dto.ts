@@ -1,6 +1,7 @@
 import {
   IsArray,
   IsEnum,
+  IsInt,
   IsISO8601,
   IsJSON,
   IsNotEmpty,
@@ -8,11 +9,12 @@ import {
   IsString,
   IsUrl,
   Matches,
+  MaxLength,
   MinLength,
   ValidateNested,
 } from 'class-validator';
 import { PostType, PostStatus } from '../posts.enum';
-import { CreatePostMetaOptionsDto } from './create-post-meta-options.dto';
+import { CreatePostMetaOptionsDto } from '../../meta-options/dtos/create-post-meta-options.dto';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -23,6 +25,7 @@ export class CreatePostDto {
   })
   @IsString()
   @MinLength(4)
+  @MaxLength(512)
   @IsNotEmpty()
   title: string;
 
@@ -44,6 +47,7 @@ export class CreatePostDto {
     message:
       'A slug should be all small letters and uses only "-" and without spaces. For example "my-url"',
   })
+  @MaxLength(256)
   slug: string;
 
   @ApiProperty({
@@ -78,6 +82,7 @@ export class CreatePostDto {
   })
   @IsOptional()
   @IsUrl()
+  @MaxLength(1024)
   featuredImageUrl?: string;
 
   @ApiPropertyOptional({
@@ -89,39 +94,36 @@ export class CreatePostDto {
   publishOn?: Date;
 
   @ApiPropertyOptional({
-    description: 'Array of tags passed as string values',
-    example: "['nestJS', 'typescript' ]",
+    description: 'Array of ids of tags',
+    example: [1, 2],
   })
   @IsArray()
   @IsOptional()
-  @IsString({ each: true })
-  @MinLength(3, { each: true })
-  tags?: string[];
+  @IsInt({ each: true })
+  tags?: number[];
 
   @ApiPropertyOptional({
-    type: 'array',
-    required: false,
-    items: {
-      type: 'object',
-      properties: {
-        key: {
-          type: 'string',
-          description:
-            'The key can be any string identifier for your meta option',
-          example: 'sidebarEnabled',
-        },
-        value: {
-          type: 'any',
-          description: 'Any value that you want to save to the key',
-          example: true,
-        },
+    type: 'object',
+    required: ['metaValue'],
+    properties: {
+      metaValue: {
+        type: 'string',
+        description: 'The metaValue is a JSON string',
+        example: '{"sidebarEnabled": true}',
       },
-      required: ['key', 'value'],
     },
   })
   @IsOptional()
-  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreatePostMetaOptionsDto)
-  metaOptions?: CreatePostMetaOptionsDto[];
+  metaOptions?: CreatePostMetaOptionsDto | null;
+
+  @ApiProperty({
+    type: 'integer',
+    required: true,
+    example: 1,
+  })
+  @IsNotEmpty()
+  @IsInt()
+  authorId: number;
 }
