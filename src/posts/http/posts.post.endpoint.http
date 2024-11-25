@@ -2,9 +2,9 @@ POST http://localhost:4000/posts
 Content-Type: application/json
 
 {
-  "title": "What's new with NestJS 4",
+  "title": "What's new with NestJS 12",
   "postType": "post",
-  "slug": "new-with-nest-js-4",
+  "slug": "new-with-nest-js-12",
   "status": "draft",
   "content": "post-content",
   "schema": "{\r\n    \"@context\": \"https:\/\/schema.org\",\r\n    \"@type\": \"Person\"\r\n  }",
