@@ -14,7 +14,9 @@ import { CreateUserDto } from '../dtos/create-user.dto';
 import { ConfigType } from '@nestjs/config';
 import profileConfig from '../config/profile.config';
 import { UsersCreateManyProvider } from './users-create-many.provider';
-import { CreateManyUsersDto } from "../dtos/create-many-users.dto";
+import { CreateManyUsersDto } from '../dtos/create-many-users.dto';
+import { CreateUserProvider } from './create-user.provider';
+import { FindOneUserByEmailProvider } from './find-one-user-by-email.provider';
 
 /**
  * Class to connect to Users table and perform business operations
@@ -31,47 +33,12 @@ export class UsersService {
     @Inject(profileConfig.KEY)
     private readonly profileConfiguration: ConfigType<typeof profileConfig>,
     private readonly usersCreateManyProvider: UsersCreateManyProvider,
+    private readonly createUserProvider: CreateUserProvider,
+    private readonly findOneUserByEmailProvider: FindOneUserByEmailProvider,
   ) {}
 
   public async createUser(createUserDto: CreateUserDto) {
-    let existingUser = undefined;
-
-    try {
-      // check if user exists with same email
-      existingUser = await this.usersRepository.findOne({
-        where: { email: createUserDto.email },
-      });
-    } catch (error) {
-      throw new RequestTimeoutException(
-        'Unable to process your request at the moment, please try again.',
-        {
-          description: 'Error connecting to the database',
-        },
-      );
-    }
-
-    // Handle exception
-    if (existingUser) {
-      throw new BadRequestException(
-        'The user already exists, please check your email address.',
-      );
-    }
-
-    // Create a new user
-    let newUser = this.usersRepository.create(createUserDto);
-
-    try {
-      newUser = await this.usersRepository.save(newUser);
-    } catch (error) {
-      throw new RequestTimeoutException(
-        'Unable to process your request at the moment, please try again.',
-        {
-          description: 'Error connecting to the database',
-        },
-      );
-    }
-
-    return newUser;
+    return this.createUserProvider.createUser(createUserDto);
   }
 
   /**
@@ -87,7 +54,6 @@ export class UsersService {
     page: number,
   ) {
     // test the new config
-    console.log(this.profileConfiguration);
 
     throw new HttpException(
       {
@@ -135,5 +101,9 @@ export class UsersService {
 
   public async createMany(createManyUsersDto: CreateManyUsersDto) {
     return await this.usersCreateManyProvider.createMany(createManyUsersDto);
+  }
+
+  public async findOneByEmail(email: string): Promise<User> {
+    return await this.findOneUserByEmailProvider.findOneByEmail(email);
   }
 }

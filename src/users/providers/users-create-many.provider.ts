@@ -23,8 +23,7 @@ export class UsersCreateManyProvider {
 
       // Start Transaction
       await queryRunner.startTransaction();
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch {
       throw new RequestTimeoutException('Could not connect to the database');
     }
 
@@ -36,7 +35,6 @@ export class UsersCreateManyProvider {
       }
       // If successful commit
       await queryRunner.commitTransaction();
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // If unsuccessful rollback
       await queryRunner.rollbackTransaction();
@@ -48,7 +46,6 @@ export class UsersCreateManyProvider {
       try {
         // Release connection
         await queryRunner.release();
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         throw new RequestTimeoutException('Could not release the connection', {
           description: String(error),

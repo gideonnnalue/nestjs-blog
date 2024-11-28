@@ -1,4 +1,4 @@
-import { Body, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/providers/users.service';
 import { CreatePostDto } from '../dtos/create-post.dto';
 import { Repository } from 'typeorm';
@@ -10,6 +10,8 @@ import { PatchPostDto } from '../dtos/patch-post.dto';
 import { GetPostsDto } from '../dtos/get-posts.dto';
 import { PaginationProvider } from '../../common/pagination/providers/pagination.provider';
 import { Paginated } from '../../common/pagination/interfaces/paginated.interface';
+import { CreatePostProvider } from './create-post.provider';
+import { ActiveUserData } from '../../auth/interfaces/active-user.interface';
 
 @Injectable()
 export class PostsService {
@@ -21,21 +23,16 @@ export class PostsService {
     private readonly metaOptionsRepository: Repository<MetaOption>,
     private readonly tagsService: TagsService,
     private readonly paginationProvider: PaginationProvider,
+    private readonly createPostProvider: CreatePostProvider,
   ) {}
 
   /**
    * Creating new post
    * @param createPostDto
    */
-  public async create(@Body() createPostDto: CreatePostDto) {
-    // Find author from database based on authorId
-    const author = await this.usersService.findOneById(createPostDto.authorId);
-
-    // Find tags
-    const tags = await this.tagsService.findMultipleTags(createPostDto.tags);
-
-    const post = this.postRepository.create({ ...createPostDto, author, tags });
-    return await this.postRepository.save(post);
+  public async create(createPostDto: CreatePostDto, user: ActiveUserData) {
+    // return the post
+    return await this.createPostProvider.create(createPostDto, user);
   }
 
   public async findAll(
